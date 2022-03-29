@@ -1,0 +1,47 @@
+datasource postgres {
+  provider = "postgresql"
+  url      = env("POSTGRESQL_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  createdAt DateTime @default(now())
+  firstName String?
+  id        String   @id @default(cuid())
+  lastName  String?
+  password  String
+  roles     String[]
+  updatedAt DateTime @updatedAt
+  username  String   @unique
+}
+
+model Order {
+  createdAt DateTime         @default(now())
+  id        String           @id @default(cuid())
+  items     Item[]
+  orders    Order[]          @relation(name: "orders")
+  owner     Order?           @relation(name: "orders", fields: [ownerId], references: [id])
+  ownerId   String?
+  price     Float?
+  status    EnumOrderStatus?
+  updatedAt DateTime         @updatedAt
+}
+
+model Item {
+  alternative String?
+  createdAt   DateTime @default(now())
+  id          String   @id @default(cuid())
+  name        String?
+  order       Order?   @relation(fields: [orderId], references: [id])
+  orderId     String?
+  updatedAt   DateTime @updatedAt
+}
+
+enum EnumOrderStatus {
+  Accepted
+  InProrgres
+  Done
+}
